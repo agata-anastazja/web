@@ -49,6 +49,7 @@ class User < ActiveRecord::Base
   scope :inactive,   -> { where(role: ROLES[:inactive]) }
   scope :applicants, -> { where(role: ROLES[:applicant]) }
   scope :recent,     -> { where(role: (ROLES.values - [ROLES[:inactive], ROLES[:guest], ROLES[:applicant]])).order('id desc') }
+  scope :member,     -> { where(role: ROLES[:member]) }
 
   scope :with_subscription,  -> { joins(:subscription).where.not(subscriptions: { subscription_id: '' }) }
   scope :created_after_date, -> (date) { where('created_at > ?', date) }
