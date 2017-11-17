@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171111095757) do
+ActiveRecord::Schema.define(version: 20171117231817) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -135,6 +135,13 @@ ActiveRecord::Schema.define(version: 20171111095757) do
   end
 
   add_index "rings", ["user_id"], name: "index_rings_on_user_id", using: :btree
+
+  create_table "staff_reminder_histories", force: :cascade do |t|
+    t.integer  "user_id"
+    t.string   "email"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "staff_reminders", force: :cascade do |t|
     t.string   "email",       default: "", null: false
