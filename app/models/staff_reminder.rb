@@ -10,6 +10,24 @@ class StaffReminder < ActiveRecord::Base
     self.last_run_at.nil? || (self.last_run_at < (time - self.frequency.hours))
   end
 
+  def next_reminder
+    user_to_contact = User.find(self.last_id)
+
+    #TODO Create a new ReminderHistory from self.last_id
+    next_user = User.select("*, greatest (times_introduced, 1) / greatest(1 ,(DATE_PART('day', '#{Time.now.to_s}'::timestamp - created_at))) as ratio").order("ratio desc").limit(1).member
+    
+    user_to_contact.increment(:times_introduced)
+    user_to_contact.last_contacted    = Time.now
+    user_to_contact.last_contacted_by = self.email
+
+    self.last_id     = next_user.id
+    self.last_run_at = Time.now
+    self.save!
+
+    user_to_contact
+
+  end
+
   def pop!
     new_id = self.last_id
     max_id = User.maximum('id')
