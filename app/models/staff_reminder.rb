@@ -12,13 +12,14 @@ class StaffReminder < ActiveRecord::Base
 
   def next_reminder
 
-    #TODO Create a new ReminderHistory from self.last_id
+
+    StaffReminderHistory.create       ({email: self.email, user_id: self.last_id})
     user_to_contact                   = User.find(self.last_id)    
     user_to_contact.last_contacted    = Time.now
     user_to_contact.last_contacted_by = self.email
     user_to_contact.increment(:times_introduced)
     #Updates the next person to contact but it can overridden manually (side note - it's referred to as last_id but in fact now relates to the next person)
-    next_user                         = User.select("*, greatest (times_introduced, 1) / greatest(1 ,(DATE_PART('day', '#{Time.now.to_s}'::timestamp - created_at))) as ratio").order("ratio desc").limit(1).member
+    next_user                         = return_next_user
     self.last_id                      = next_user.id
     self.last_run_at                  = Time.now
     self.save!
@@ -57,9 +58,13 @@ class StaffReminder < ActiveRecord::Base
 
   private
 
+  def return_next_user
+    User.select("*, greatest (times_introduced, 1) / greatest(1 ,(DATE_PART('day', '#{Time.now.to_s}'::timestamp - created_at))) as ratio").order("ratio desc").limit(1).member
+  end
+
   def set_default_last_id
     if self.last_id.blank?
-      self.last_id = 0
+      self.last_id = return_next_user.id
     end
   end
 
